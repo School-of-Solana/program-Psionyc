@@ -9,11 +9,14 @@ skip-lint = false
 anchor_project = "FXBozhUYrc2uHya13RGyHp6YWEieTAGpiz9nvWqcJMid"
 real_estate = "3U6NSTN5Pm9VaMeTCdYq9RFUddeStn4zn63uXm33dr4A"
 
+[programs.devnet]
+real_estate = "3U6NSTN5Pm9VaMeTCdYq9RFUddeStn4zn63uXm33dr4A"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

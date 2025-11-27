@@ -1,22 +1,83 @@
-import realEstateIdl from "./real_estate.idl.json";
-
-/**
- * Program IDL in camelCase format in order to be used in JS/TS.
- *
- * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/real_estate.json`.
- */
-export type RealEstate = {
+{
     "address": "3U6NSTN5Pm9VaMeTCdYq9RFUddeStn4zn63uXm33dr4A",
     "metadata": {
-        "name": "realEstate",
+        "name": "real_estate",
         "version": "0.1.0",
         "spec": "0.1.0",
         "description": "Created with Anchor"
     },
     "instructions": [
         {
-            "name": "fundProperty",
+            "name": "create_property",
+            "discriminator": [
+                45,
+                115,
+                89,
+                113,
+                193,
+                252,
+                125,
+                27
+            ],
+            "accounts": [
+                {
+                    "name": "creator",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "registry",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    112,
+                                    114,
+                                    111,
+                                    112,
+                                    101,
+                                    114,
+                                    116,
+                                    121,
+                                    95,
+                                    114,
+                                    101,
+                                    103,
+                                    105,
+                                    115,
+                                    116,
+                                    114,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "property",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                }
+            ],
+            "args": [
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "image_url",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "fund_property",
             "discriminator": [
                 153,
                 177,
@@ -34,7 +95,7 @@ export type RealEstate = {
                     "signer": true
                 },
                 {
-                    "name": "propertyVault",
+                    "name": "property_vault",
                     "docs": [
                         "Create the vault on first use, else just load it"
                     ],
@@ -62,13 +123,13 @@ export type RealEstate = {
                             },
                             {
                                 "kind": "arg",
-                                "path": "propertyId"
+                                "path": "property_id"
                             }
                         ]
                     }
                 },
                 {
-                    "name": "paymentRecord",
+                    "name": "payment_record",
                     "docs": [
                         "One record per (user, property). Updated, not re-created."
                     ],
@@ -89,7 +150,7 @@ export type RealEstate = {
                             },
                             {
                                 "kind": "arg",
-                                "path": "propertyId"
+                                "path": "property_id"
                             },
                             {
                                 "kind": "account",
@@ -99,13 +160,13 @@ export type RealEstate = {
                     }
                 },
                 {
-                    "name": "systemProgram",
+                    "name": "system_program",
                     "address": "11111111111111111111111111111111"
                 }
             ],
             "args": [
                 {
-                    "name": "propertyId",
+                    "name": "property_id",
                     "type": "u32"
                 },
                 {
@@ -115,7 +176,7 @@ export type RealEstate = {
             ]
         },
         {
-            "name": "withdrawMaster",
+            "name": "withdraw_master",
             "discriminator": [
                 223,
                 5,
@@ -136,7 +197,7 @@ export type RealEstate = {
                     "signer": true
                 },
                 {
-                    "name": "propertyVault",
+                    "name": "property_vault",
                     "writable": true,
                     "pda": {
                         "seeds": [
@@ -161,7 +222,7 @@ export type RealEstate = {
                             },
                             {
                                 "kind": "arg",
-                                "path": "propertyId"
+                                "path": "property_id"
                             }
                         ]
                     }
@@ -169,7 +230,7 @@ export type RealEstate = {
             ],
             "args": [
                 {
-                    "name": "propertyId",
+                    "name": "_property_id",
                     "type": "u32"
                 },
                 {
@@ -179,7 +240,7 @@ export type RealEstate = {
             ]
         },
         {
-            "name": "withdrawMyPayment",
+            "name": "withdraw_my_payment",
             "discriminator": [
                 184,
                 58,
@@ -196,11 +257,11 @@ export type RealEstate = {
                     "writable": true,
                     "signer": true,
                     "relations": [
-                        "paymentRecord"
+                        "payment_record"
                     ]
                 },
                 {
-                    "name": "paymentRecord",
+                    "name": "payment_record",
                     "writable": true,
                     "pda": {
                         "seeds": [
@@ -218,7 +279,7 @@ export type RealEstate = {
                             },
                             {
                                 "kind": "arg",
-                                "path": "propertyId"
+                                "path": "property_id"
                             },
                             {
                                 "kind": "account",
@@ -228,7 +289,7 @@ export type RealEstate = {
                     }
                 },
                 {
-                    "name": "propertyVault",
+                    "name": "property_vault",
                     "writable": true,
                     "pda": {
                         "seeds": [
@@ -253,7 +314,7 @@ export type RealEstate = {
                             },
                             {
                                 "kind": "arg",
-                                "path": "propertyId"
+                                "path": "property_id"
                             }
                         ]
                     }
@@ -261,7 +322,7 @@ export type RealEstate = {
             ],
             "args": [
                 {
-                    "name": "propertyId",
+                    "name": "_property_id",
                     "type": "u32"
                 },
                 {
@@ -273,7 +334,7 @@ export type RealEstate = {
     ],
     "accounts": [
         {
-            "name": "paymentRecord",
+            "name": "PaymentRecord",
             "discriminator": [
                 202,
                 168,
@@ -283,52 +344,12 @@ export type RealEstate = {
                 226,
                 86,
                 226
-            ]
-        },
-        {
-            "name": "propertyVault",
-            "discriminator": [
-                8,
-                22,
-                82,
-                123,
-                16,
-                77,
-                38,
-                145
-            ]
-        }
-    ],
-    "errors": [
-        {
-            "code": 6000,
-            "name": "alreadyWithdrawn",
-            "msg": "Payment already withdrawn"
-        },
-        {
-            "code": 6001,
-            "name": "unauthorized",
-            "msg": "unauthorized"
-        },
-        {
-            "code": 6002,
-            "name": "insufficientFunds",
-            "msg": "Insufficient deposit balance"
-        },
-        {
-            "code": 6003,
-            "name": "vaultInsufficientFunds",
-            "msg": "Insufficient funds in the vault"
-        }
-    ],
-    "types": [
-        {
-            "name": "paymentRecord",
+            ],
             "type": {
                 "kind": "struct",
                 "fields": [
                     {
-                        "name": "propertyId",
+                        "name": "property_id",
                         "type": "u32"
                     },
                     {
@@ -351,12 +372,197 @@ export type RealEstate = {
             }
         },
         {
-            "name": "propertyVault",
+            "name": "Property",
+            "discriminator": [
+                195,
+                247,
+                69,
+                181,
+                195,
+                47,
+                152,
+                19
+            ],
             "type": {
                 "kind": "struct",
                 "fields": [
                     {
-                        "name": "propertyId",
+                        "name": "property_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "name": "image_url",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "PropertyRegistry",
+            "discriminator": [
+                240,
+                117,
+                59,
+                100,
+                129,
+                78,
+                224,
+                201
+            ],
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "next_property_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "PropertyVault",
+            "discriminator": [
+                8,
+                22,
+                82,
+                123,
+                16,
+                77,
+                38,
+                145
+            ],
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "property_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        }
+    ],
+    "errors": [
+        {
+            "code": 6000,
+            "name": "AlreadyWithdrawn",
+            "msg": "Payment already withdrawn"
+        },
+        {
+            "code": 6001,
+            "name": "Unauthorized",
+            "msg": "Unauthorized"
+        },
+        {
+            "code": 6002,
+            "name": "InsufficientFunds",
+            "msg": "Insufficient deposit balance"
+        },
+        {
+            "code": 6003,
+            "name": "VaultInsufficientFunds",
+            "msg": "Insufficient funds in the vault"
+        },
+        {
+            "code": 6004,
+            "name": "NameTooLong",
+            "msg": "Property name too long"
+        },
+        {
+            "code": 6005,
+            "name": "ImageUrlTooLong",
+            "msg": "Image URL too long"
+        },
+        {
+            "code": 6006,
+            "name": "IdOverflow",
+            "msg": "Property id overflow"
+        }
+    ],
+    "types": [
+        {
+            "name": "PaymentRecord",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "property_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "payer",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "withdrawn",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Property",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "property_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "name": "image_url",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "PropertyRegistry",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "next_property_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "PropertyVault",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "property_id",
                         "type": "u32"
                     },
                     {
@@ -367,6 +573,4 @@ export type RealEstate = {
             }
         }
     ]
-};
-
-export const REAL_ESTATE_IDL = realEstateIdl as RealEstate;
+}

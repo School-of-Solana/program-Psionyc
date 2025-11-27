@@ -33,6 +33,28 @@ const paymentRecordPda = (propertyId: number, payer: PublicKey) =>
         program.programId
     )[0];
 
+const create_property = async (name: string, imageUrl: string) => {
+    const property = Keypair.generate();
+    const [registry] = PublicKey.findProgramAddressSync(
+        [Buffer.from("property_registry")],
+        program.programId
+    );
+
+    await program.methods
+        .createProperty(name, imageUrl)
+        .accounts({
+            creator: provider.wallet.publicKey,
+            
+            property: property.publicKey,
+        })
+        .signers([property])
+        .rpc();
+
+    const propertyAccount = await program.account.property.fetch(property.publicKey);
+
+    return { propertyPublicKey: property.publicKey, propertyAccount };
+};
+
 const expectAnchorError = async (promise: Promise<unknown>, code: string) => {
     try {
         await promise;

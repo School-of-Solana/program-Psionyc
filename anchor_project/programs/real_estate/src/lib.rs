@@ -2,16 +2,44 @@ use anchor_lang::prelude::*;
 use anchor_lang::system_program;
 use std::str::FromStr;
 
-
 declare_id!("3U6NSTN5Pm9VaMeTCdYq9RFUddeStn4zn63uXm33dr4A");
-
 
 // **Replace this with your real Squads multisig pubkey**
 const SQUADS_MULTISIG_PUBKEY: &str = "6KrYBHTXzJjn78L4aJGpocQwiJEoV1yqu6HNqgFixEYE";
+const MAX_PROPERTY_NAME_LEN: usize = 64;
+const MAX_IMAGE_URL_LEN: usize = 200;
 
 #[program]
 pub mod real_estate {
     use super::*;
+
+    pub fn create_property(
+        ctx: Context<CreateProperty>,
+        name: String,
+        image_url: String,
+    ) -> Result<()> {
+        require!(name.len() <= MAX_PROPERTY_NAME_LEN, ErrorCode::NameTooLong);
+        require!(
+            image_url.len() <= MAX_IMAGE_URL_LEN,
+            ErrorCode::ImageUrlTooLong
+        );
+
+        let registry = &mut ctx.accounts.registry;
+        let property = &mut ctx.accounts.property;
+
+        let property_id = registry.next_property_id;
+        property.property_id = property_id;
+        property.name = name;
+        property.image_url = image_url;
+
+        registry.next_property_id = registry
+            .next_property_id
+            .checked_add(1)
+            .ok_or(ErrorCode::IdOverflow)?;
+        
+
+        Ok(())
+    }
 
     pub fn fund_property(ctx: Context<FundProperty>, property_id: u32, amount: u64) -> Result<()> {
         // 1️⃣ Move lamports into the vault PDA
@@ -45,7 +73,7 @@ pub mod real_estate {
             rec.amount = rec.amount.saturating_add(amount);
         }
         rec.withdrawn = false; // unlock it
-        // rec.bump = *ctx.bumps.get("payment_record").unwrap();
+                               // rec.bump = *ctx.bumps.get("payment_record").unwrap();
 
         Ok(())
     }
@@ -61,8 +89,10 @@ pub mod real_estate {
 
         // Ensure they can't withdraw more than they've deposited
         require!(amount <= rec.amount, ErrorCode::InsufficientFunds);
-        require!(**vault.lamports.borrow() >= amount, ErrorCode::VaultInsufficientFunds);
-
+        require!(
+            **vault.lamports.borrow() >= amount,
+            ErrorCode::VaultInsufficientFunds
+        );
 
         **vault.try_borrow_mut_lamports()? -= amount;
         **to.try_borrow_mut_lamports()? += amount;
@@ -82,25 +112,52 @@ pub mod real_estate {
         amount: u64,
     ) -> Result<()> {
         // 1️⃣ Check only your Squads multisig key can call this
-        
+
         let expected =
-        Pubkey::from_str(SQUADS_MULTISIG_PUBKEY).map_err(|_| ErrorCode::Unauthorized)?;
+            Pubkey::from_str(SQUADS_MULTISIG_PUBKEY).map_err(|_| ErrorCode::Unauthorized)?;
         require!(
             ctx.accounts.master.key() == expected,
             ErrorCode::Unauthorized
         );
-        
+
         // 2️⃣ Move lamports out to the multisig signer
         let vault = &mut ctx.accounts.property_vault.to_account_info();
         let master = &mut ctx.accounts.master.to_account_info();
-        
-        require!(**vault.lamports.borrow() >= amount, ErrorCode::VaultInsufficientFunds);
+
+        require!(
+            **vault.lamports.borrow() >= amount,
+            ErrorCode::VaultInsufficientFunds
+        );
 
         **vault.try_borrow_mut_lamports()? -= amount;
         **master.try_borrow_mut_lamports()? += amount;
 
         Ok(())
     }
+}
+
+#[derive(Accounts)]
+pub struct CreateProperty<'info> {
+    #[account(mut)]
+    pub creator: Signer<'info>,
+
+    #[account(
+        init_if_needed,
+        payer = creator,
+        space = PropertyRegistry::SPACE,
+        seeds = [b"property_registry"],
+        bump
+    )]
+    pub registry: Account<'info, PropertyRegistry>,
+
+    #[account(
+        init,
+        payer = creator,
+        space = Property::SPACE,
+    )]
+    pub property: Account<'info, Property>,
+
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
@@ -179,6 +236,16 @@ pub struct WithdrawMaster<'info> {
 }
 
 #[account]
+pub struct PropertyRegistry {
+    pub next_property_id: u32,
+    pub bump: u8,
+}
+
+impl PropertyRegistry {
+    pub const SPACE: usize = 8 + 4 + 1;
+}
+
+#[account]
 pub struct PropertyVault {
     pub property_id: u32,
     pub bump: u8,
@@ -193,6 +260,25 @@ pub struct PaymentRecord {
     pub bump: u8,
 }
 
+#[account]
+pub struct Property {
+    pub property_id: u32,
+    pub name: String,
+    pub image_url: String,
+}
+
+impl Property {
+    pub const SPACE: usize = 8 + 4 + 4 + MAX_PROPERTY_NAME_LEN + 4 + MAX_IMAGE_URL_LEN;
+
+    pub fn create_property(id: u32, name: String, image_url: String) -> Self {
+        Self {
+            property_id: id,
+            name,
+            image_url,
+        }
+    }
+}
+
 #[error_code]
 pub enum ErrorCode {
     #[msg("Payment already withdrawn")]
@@ -203,4 +289,10 @@ pub enum ErrorCode {
     InsufficientFunds,
     #[msg("Insufficient funds in the vault")]
     VaultInsufficientFunds,
+    #[msg("Property name too long")]
+    NameTooLong,
+    #[msg("Image URL too long")]
+    ImageUrlTooLong,
+    #[msg("Property id overflow")]
+    IdOverflow,
 }
