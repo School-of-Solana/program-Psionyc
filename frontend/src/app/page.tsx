@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnchorProvider, BN, Program } from "@coral-xyz/anchor";
-import type { Wallet } from "@coral-xyz/anchor";
+import type { Wallet as AnchorWalletInterface } from "@coral-xyz/anchor";
 import {
   Connection,
   LAMPORTS_PER_SOL,
@@ -133,7 +133,7 @@ export default function HomePage() {
     [],
   );
 
-  const anchorWallet = useMemo<Wallet | null>(() => {
+  const anchorWallet = useMemo<AnchorWalletInterface | null>(() => {
     if (!phantom || !publicKey) return null;
     return {
       publicKey,
@@ -158,6 +158,7 @@ export default function HomePage() {
     if (parsedPropertyId === null) {
       setVaultLamports(null);
       setPaymentRecord(null);
+      setAccountLoading(false);
       return;
     }
     setAccountLoading(true);
@@ -216,6 +217,10 @@ export default function HomePage() {
     provider.on("disconnect", handleDisconnect);
     provider.on("accountChanged", handleAccountChange);
 
+    if (provider.publicKey) {
+      setKey(provider.publicKey);
+    }
+
     provider.connect({ onlyIfTrusted: true }).catch(() => undefined);
 
     return () => {
@@ -227,7 +232,7 @@ export default function HomePage() {
 
   useEffect(() => {
     refreshAccounts();
-  }, [parsedPropertyId, publicKey, program, refreshAccounts]);
+  }, [refreshAccounts]);
 
   const requireWallet = () => {
     if (!phantom) {
@@ -253,7 +258,6 @@ export default function HomePage() {
     label: string,
     handler: () => Promise<string>,
   ) => {
-    if (!requireWallet()) return;
     setPendingAction(label);
     setFeedback({ variant: "info", message: `${label} in progress…` });
     try {
@@ -271,9 +275,22 @@ export default function HomePage() {
     }
   };
 
-  const handleFund = async () => {
-    if (!requireWallet() || !parsedPropertyId || !program || !publicKey) return;
-    const amount = lamportsBnFromSol(fundAmount);
+const handleFund = async () => {
+    if (
+      !requireWallet() ||
+      parsedPropertyId === null ||
+      !program ||
+      !publicKey
+    ) {
+      return;
+    }
+    let amount: BN;
+    try {
+      amount = lamportsBnFromSol(fundAmount);
+    } catch (error) {
+      setFeedback({ variant: "error", message: extractError(error) });
+      return;
+    }
     const [vaultPda] = getVaultPda(parsedPropertyId);
     const [paymentPda] = getPaymentRecordPda(parsedPropertyId, publicKey);
     await runAction("Funding property", () =>
@@ -289,9 +306,22 @@ export default function HomePage() {
     );
   };
 
-  const handleWithdraw = async () => {
-    if (!requireWallet() || !parsedPropertyId || !program || !publicKey) return;
-    const amount = lamportsBnFromSol(withdrawAmount);
+const handleWithdraw = async () => {
+    if (
+      !requireWallet() ||
+      parsedPropertyId === null ||
+      !program ||
+      !publicKey
+    ) {
+      return;
+    }
+    let amount: BN;
+    try {
+      amount = lamportsBnFromSol(withdrawAmount);
+    } catch (error) {
+      setFeedback({ variant: "error", message: extractError(error) });
+      return;
+    }
     const [vaultPda] = getVaultPda(parsedPropertyId);
     const [paymentPda] = getPaymentRecordPda(parsedPropertyId, publicKey);
     await runAction("Withdrawing deposit", () =>
@@ -306,9 +336,22 @@ export default function HomePage() {
     );
   };
 
-  const handleMasterWithdraw = async () => {
-    if (!requireWallet() || !parsedPropertyId || !program || !publicKey) return;
-    const amount = lamportsBnFromSol(masterAmount);
+const handleMasterWithdraw = async () => {
+    if (
+      !requireWallet() ||
+      parsedPropertyId === null ||
+      !program ||
+      !publicKey
+    ) {
+      return;
+    }
+    let amount: BN;
+    try {
+      amount = lamportsBnFromSol(masterAmount);
+    } catch (error) {
+      setFeedback({ variant: "error", message: extractError(error) });
+      return;
+    }
     const [vaultPda] = getVaultPda(parsedPropertyId);
     await runAction("Master withdraw", () =>
       program.methods
