@@ -180,6 +180,7 @@ export default function HomePage() {
     const stubKeypair = Keypair.generate();
     return {
       publicKey: stubKeypair.publicKey,
+      payer: stubKeypair,
       async signTransaction() {
         throw new Error("Wallet not available in read-only mode");
       },
@@ -432,7 +433,7 @@ function PropertyActions({
   canWithdraw,
   refresh,
 }: PropertyActionsProps) {
-  const signer = useWalletAccountTransactionSendingSigner(account, chain);
+  const signer = useWalletAccountTransactionSendingSigner(account, "solana:");
   const [fundAmount, setFundAmount] = useState("0.50");
   const [withdrawAmount, setWithdrawAmount] = useState("0.10");
   const [pending, setPending] = useState<"fund" | "withdraw" | null>(null);
@@ -506,10 +507,7 @@ function PropertyActions({
       return program.methods
         .fundProperty(propertyId, amount)
         .accounts({
-          payer: walletPublicKey,
-          propertyVault: vaultPda,
-          paymentRecord: paymentPda,
-          systemProgram: SystemProgram.programId,
+          payer: walletPublicKey
         })
         .instruction();
     });
