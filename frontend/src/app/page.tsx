@@ -49,7 +49,8 @@ const PROPERTIES: PropertyMeta[] = [
     highlight: "Tokenized waterfront rentals with projected 11.8% APY.",
     focus: "Backed by a 24-unit mixed-use building in Brickell.",
     tag: "Flagship",
-    gradient: "from-sky-600 via-indigo-600 to-violet-500",
+    imageUrl:
+      "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: 7,
@@ -58,7 +59,8 @@ const PROPERTIES: PropertyMeta[] = [
     highlight: "Short-term luxury stays near TPC Scottsdale.",
     focus: "Revenue share across 8 designer villas.",
     tag: "Income",
-    gradient: "from-amber-500 via-orange-500 to-rose-500",
+    imageUrl:
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: 21,
@@ -67,7 +69,8 @@ const PROPERTIES: PropertyMeta[] = [
     highlight: "Suburban single-family rentals with long-term tenants.",
     focus: "Stabilized yield with conservative leverage.",
     tag: "Stability",
-    gradient: "from-emerald-500 via-teal-500 to-cyan-500",
+    imageUrl:
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80",
   },
 ];
 
@@ -433,7 +436,7 @@ function PropertyActions({
   canWithdraw,
   refresh,
 }: PropertyActionsProps) {
-  const signer = useWalletAccountTransactionSendingSigner(account, "solana:");
+  const signer = useWalletAccountTransactionSendingSigner(account, "solana:devnet");
   const [fundAmount, setFundAmount] = useState("0.50");
   const [withdrawAmount, setWithdrawAmount] = useState("0.10");
   const [pending, setPending] = useState<"fund" | "withdraw" | null>(null);

@@ -9,7 +9,7 @@ export type PropertyMeta = {
   highlight: string;
   focus: string;
   tag: string;
-  gradient: string;
+  imageUrl: string;
 };
 
 export type PropertySummary = {
@@ -42,13 +42,12 @@ export function PropertyCard({
           : "border-slate-800 bg-slate-900/40 hover:border-indigo-400/40 hover:bg-slate-900/60"
       )}
     >
-      <div
-        className={cn(
-          "h-36 w-full rounded-2xl",
-          "bg-gradient-to-r",
-          property.gradient
-        )}
-      />
+      <div className="h-36 w-full overflow-hidden rounded-2xl bg-slate-900/30">
+        <div
+          className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+          style={{ backgroundImage: `url(${property.imageUrl})` }}
+        />
+      </div>
       <div className="space-y-2">
         <p className="text-xs uppercase tracking-wide text-slate-400">
           {property.tag}

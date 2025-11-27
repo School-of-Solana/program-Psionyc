@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSolana } from "./solana_provider";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -120,7 +121,14 @@ export function WalletConnectButton() {
     return (
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="min-w-[140px] justify-between">
+                <Button
+                    variant="outline"
+                    className={cn(
+                        "min-w-[140px] justify-between",
+                        "text-slate-900",
+                        "dark:text-slate-900 dark:hover:text-slate-900 dark:focus:text-slate-900"
+                    )}
+                >
                     {isConnected && selectedWallet && selectedAccount ? (
                         <>
                             <div className="flex items-center gap-2">
